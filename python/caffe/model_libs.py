@@ -4,6 +4,7 @@ import caffe
 from caffe import layers as L
 from caffe import params as P
 from caffe.proto import caffe_pb2
+from caffe import coord_map
 
 def check_if_exist(path):
     return os.path.exists(path)
@@ -731,20 +732,21 @@ def CreateMultiBoxHead(net, data_layer="data", num_classes=[], from_layers=[],
 
         # Create prior generation layer.
         name = "{}_mbox_priorbox".format(from_layer)
+        tf = coord_map.coord_map_from_to(net[from_layer],net[data_layer]);
         if max_sizes and max_sizes[i]:
             if aspect_ratio:
                 net[name] = L.PriorBox(net[from_layer], net[data_layer], min_size=min_sizes[i], max_size=max_sizes[i],
-                    aspect_ratio=aspect_ratio, flip=flip, clip=clip, variance=prior_variance)
+                    aspect_ratio=aspect_ratio, flip=flip, clip=clip, variance=prior_variance, stride=int(tf[1][0]), offset=0.5*tf[1][0]-tf[2][0])
             else:
                 net[name] = L.PriorBox(net[from_layer], net[data_layer], min_size=min_sizes[i], max_size=max_sizes[i],
-                    clip=clip, variance=prior_variance)
+                    clip=clip, variance=prior_variance, stride=int(tf[1][0]), offset=0.5*tf[1][0]-tf[2][0])
         else:
             if aspect_ratio:
                 net[name] = L.PriorBox(net[from_layer], net[data_layer], min_size=min_sizes[i],
-                    aspect_ratio=aspect_ratio, flip=flip, clip=clip, variance=prior_variance)
+                    aspect_ratio=aspect_ratio, flip=flip, clip=clip, variance=prior_variance, stride=int(tf[1][0]), offset=0.5*tf[1][0]-tf[2][0])
             else:
                 net[name] = L.PriorBox(net[from_layer], net[data_layer], min_size=min_sizes[i],
-                    clip=clip, variance=prior_variance)
+                    clip=clip, variance=prior_variance, stride=int(tf[1][0]), offset=0.5*tf[1][0]-tf[2][0])
         priorbox_layers.append(net[name])
 
         # Create objectness prediction layer.

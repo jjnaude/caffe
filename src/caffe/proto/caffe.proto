@@ -1315,6 +1315,8 @@ message PriorBoxParameter {
   optional bool clip = 5 [default = true];
   // Variance for adjusting the prior bboxes.
   repeated float variance = 6;
+  optional uint32 stride = 7;
+  optional float offset = 8;
 }
 
 message PythonParameter {

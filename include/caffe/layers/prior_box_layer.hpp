@@ -68,6 +68,8 @@ class PriorBoxLayer : public Layer<Dtype> {
   bool flip_;
   int num_priors_;
   bool clip_;
+  float offset_;
+  int stride_;
   vector<float> variance_;
 };
 

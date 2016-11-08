@@ -56,6 +56,18 @@ void PriorBoxLayer<Dtype>::LayerSetUp(const vector<Blob<Dtype>*>& bottom,
     // Set default to 0.1.
     variance_.push_back(0.1);
   }
+  if (prior_box_param.has_stride()) {
+    stride_ = prior_box_param.stride();
+    CHECK_GT(stride_, 0) << "stride must be greater than 0.";
+  }
+  else
+	  stride_=0;
+  if (prior_box_param.has_offset()) {
+    offset_ = prior_box_param.offset();
+    CHECK_GE(offset_, 0) << "offset must be a positive number";
+  }
+  else
+	  offset_=0.5;
 }
 
 template <typename Dtype>
@@ -89,8 +101,14 @@ void PriorBoxLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
   int idx = 0;
   for (int h = 0; h < layer_height; ++h) {
     for (int w = 0; w < layer_width; ++w) {
-      float center_x = (w + 0.5) * step_x;
-      float center_y = (h + 0.5) * step_y;
+      float center_x,center_y;
+      if (stride_>0){
+          center_x = w*stride_+offset_;
+          center_y = h*stride_+offset_;
+      }else{ //If stride is not specified use old approximation
+    	  center_x = (w + 0.5) * step_x;
+      	  center_y = (h + 0.5) * step_y;
+      }
       float box_width, box_height;
       // first prior: aspect_ratio = 1, size = min_size
       box_width = box_height = min_size_;
