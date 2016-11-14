@@ -136,6 +136,8 @@ template <typename Dtype>
 void MultiBoxLossLayer<Dtype>::Reshape(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top) {
   LossLayer<Dtype>::Reshape(bottom, top);
+  top[1]->ReshapeLike(*(top[0]));
+  top[2]->ReshapeLike(*(top[0]));
   num_ = bottom[0]->num();
   num_priors_ = bottom[2]->height() / 4;
   num_gt_ = bottom[3]->height();
@@ -447,12 +449,15 @@ void MultiBoxLossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
         normalization_, num_, num_priors_, num_matches_);
     top[0]->mutable_cpu_data()[0] +=
         loc_weight_ * loc_loss_.cpu_data()[0] / normalizer;
+    top[1]->mutable_cpu_data()[0] =
+        loc_weight_ * loc_loss_.cpu_data()[0] / normalizer;
   }
   if (this->layer_param_.propagate_down(1)) {
     // TODO(weiliu89): Understand why it needs to divide 2.
     Dtype normalizer = LossLayer<Dtype>::GetNormalizer(
         normalization_, num_, num_priors_, num_matches_);
     top[0]->mutable_cpu_data()[0] += conf_loss_.cpu_data()[0] / normalizer;
+    top[2]->mutable_cpu_data()[0] = conf_loss_.cpu_data()[0] / normalizer;
   }
 }
 
